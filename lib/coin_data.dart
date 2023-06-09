@@ -1,3 +1,4 @@
+//all currencies we checking value for
 const List<String> currenciesList = [
   'AUD',
   'BRL',
