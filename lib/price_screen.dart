@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'coin_data.dart';
 import 'dart:io' show Platform; //to see which platfrom our code is run on.
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PriceScreen extends StatefulWidget {
   const PriceScreen({super.key});
@@ -11,6 +13,7 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
+  String? rate;
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -60,8 +63,23 @@ class _PriceScreenState extends State<PriceScreen> {
   //   }
   // }
 
+//https://rest.coinapi.io/v1/exchangerate/BTC/USD?apikey=445C6A7D-1A72-49D8-9767-A25FD33C0343
+
+  void fetchData() async {
+    try {
+      var response = await http.get(Uri.parse(
+          'https://rest.coinapi.io/v1/exchangerate/BTC/$selectedCurrency?apikey=445C6A7D-1A72-49D8-9767-A25FD33C0343'));
+      print('Response status: ${response.statusCode}');
+      var data = jsonDecode(response.body);
+      rate = data['rate'].toStringAsFixed(2);
+    } catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    fetchData();
     return Scaffold(
       appBar: AppBar(
         title: const Text('🤑 Coin Ticker'),
@@ -78,12 +96,13 @@ class _PriceScreenState extends State<PriceScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC = $rate $selectedCurrency',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20.0,
                     color: Colors.white,
                   ),
